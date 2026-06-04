@@ -1,0 +1,27 @@
+{
+  "clases": [
+    "maduro",
+    "podrido",
+    "verde"
+  ],
+  "class_indices": {
+    "maduro": 0,
+    "podrido": 1,
+    "verde": 2
+  },
+  "idx_to_class": {
+    "0": "maduro",
+    "1": "podrido",
+    "2": "verde"
+  },
+  "input_size": [
+    224,
+    224,
+    3
+  ],
+  "val_accuracy": 0.8557,
+  "val_loss": 0.2698,
+  "modelo_base": "MobileNetV2",
+  "num_clases": 3,
+  "descripcion": "Detector de calidad de frutas — maduro/verde/podrido"
+}

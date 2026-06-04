@@ -1,0 +1,88 @@
+<div class="panel camera-panel">
+  <div class="panel-header">
+    <div class="panel-title">
+      <span class="dot"></span>
+      Visor de cámara
+    </div>
+    <span class="badge" [class.badge-live]="hasSource">{{ statusText() }}</span>
+  </div>
+
+  <!-- Fruit selector -->
+  <div class="fruit-selector">
+    <span class="selector-label">Fruta:</span>
+    <div class="fruit-chips">
+      @for (fruit of fruits; track fruit) {
+        <button
+          class="fruit-chip"
+          [class.active]="selectedFruit() === fruit"
+          (click)="selectFruit(fruit)"
+        >
+          {{ getChipEmoji(fruit) }} {{ fruit }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Viewport -->
+  <div class="viewport">
+    <video #videoEl autoplay muted playsinline [class.visible]="cameraActive()"></video>
+    <img #previewImg alt="preview" [class.visible]="imageLoaded()" />
+
+    @if (!cameraActive() && !imageLoaded()) {
+      <div class="placeholder">
+        @if (cameraError()) {
+          <div class="placeholder-icon">⚠️</div>
+          <p>Permiso de cámara denegado</p>
+          <small>Usa el botón "Cargar imagen"</small>
+        } @else {
+          <div class="placeholder-icon">📷</div>
+          <p>Inicia la cámara o carga una imagen</p>
+        }
+      </div>
+    }
+
+    @if (hasSource) {
+      <div class="scan-overlay">
+        <div class="scan-line"></div>
+        <span class="corner tl"></span>
+        <span class="corner tr"></span>
+        <span class="corner bl"></span>
+        <span class="corner br"></span>
+      </div>
+    }
+
+    @if (isAnalyzing()) {
+      <div class="analyzing-overlay">
+        <div class="spinner"></div>
+        <span class="analyzing-text">Analizando</span>
+        <span class="analyzing-sub">Ejecutando inferencia TF.js…</span>
+      </div>
+    }
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn btn-primary" (click)="startCamera()" [disabled]="cameraActive() || isAnalyzing()">
+      📷 Iniciar cámara
+    </button>
+    <button class="btn btn-secondary" (click)="analyze()" [disabled]="!hasSource || isAnalyzing()">
+      🔍 Analizar
+    </button>
+    <button class="btn btn-secondary" (click)="triggerUpload()" [disabled]="isAnalyzing()">
+      📁 Cargar imagen
+    </button>
+    <button class="btn btn-danger" (click)="stopCamera()" [disabled]="!cameraActive()">
+      ⏹ Detener
+    </button>
+    <input type="file" #fileInputEl accept="image/jpeg,image/png,image/webp" (change)="onFileChange($event)" />
+  </div>
+
+  <!-- Demo strip -->
+  <div class="demo-strip">
+    <span class="demo-label">Simular:</span>
+    <button class="demo-btn cls-maduro" (click)="runDemo('maduro')">🍌 <span>Maduro</span></button>
+    <button class="demo-btn cls-verde" (click)="runDemo('verde')">🥭 <span>Verde</span></button>
+    <button class="demo-btn cls-podrido" (click)="runDemo('podrido')">🍎 <span>Podrido</span></button>
+    <button class="demo-btn" (click)="runDemo('low')">⚠️ <span>Baja conf.</span></button>
+  </div>
+</div>

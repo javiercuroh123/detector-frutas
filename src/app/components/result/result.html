@@ -1,0 +1,97 @@
+<div class="panel">
+  <div class="panel-header">
+    <div class="panel-title">
+      <span class="dot"></span>
+      Resultado
+    </div>
+    <span class="badge">{{ inferenceTime() }}</span>
+  </div>
+
+  <div class="panel-body result-body">
+
+    <!-- Circular SVG Gauge -->
+    <div class="gauge-wrap" [class]="'cls-' + displayClass()">
+      <svg class="gauge-svg" viewBox="0 0 140 140" fill="none" aria-hidden="true">
+        <!-- Background track (270°) -->
+        <circle
+          class="gauge-track"
+          cx="70" cy="70" r="52"
+          stroke-dasharray="245.1 81.6"
+          transform="rotate(135, 70, 70)"
+        />
+        <!-- Glow layer -->
+        <circle
+          class="gauge-glow"
+          cx="70" cy="70" r="52"
+          [attr.stroke-dasharray]="gaugeDash()"
+          transform="rotate(135, 70, 70)"
+          [attr.stroke]="gaugeColor()"
+        />
+        <!-- Progress arc -->
+        <circle
+          class="gauge-fill"
+          cx="70" cy="70" r="52"
+          [attr.stroke-dasharray]="gaugeDash()"
+          transform="rotate(135, 70, 70)"
+          [attr.stroke]="gaugeColor()"
+        />
+      </svg>
+
+      <!-- Center content -->
+      <div class="gauge-center">
+        <div class="gauge-icon">{{ displayIcon() }}</div>
+        <div class="gauge-pct" [class]="'cls-' + displayClass()">{{ confidencePct() }}%</div>
+        <div class="gauge-sub">confianza</div>
+      </div>
+    </div>
+
+    <!-- Class label -->
+    <div class="result-label" [class]="'cls-' + displayClass()">{{ displayLabel() }}</div>
+    <div class="result-sub">{{ displaySub() }}</div>
+
+    <!-- Probability breakdown -->
+    <div class="probs-section">
+      <div class="prob-row">
+        <span class="prob-name">Maduro</span>
+        <div class="prob-track">
+          <div class="prob-fill cls-maduro" [style.width.%]="probMaduro()"></div>
+        </div>
+        <span class="prob-val">{{ probMaduro() }}%</span>
+      </div>
+      <div class="prob-row">
+        <span class="prob-name">Verde</span>
+        <div class="prob-track">
+          <div class="prob-fill cls-verde" [style.width.%]="probVerde()"></div>
+        </div>
+        <span class="prob-val">{{ probVerde() }}%</span>
+      </div>
+      <div class="prob-row">
+        <span class="prob-name">Podrido</span>
+        <div class="prob-track">
+          <div class="prob-fill cls-podrido" [style.width.%]="probPodrido()"></div>
+        </div>
+        <span class="prob-val">{{ probPodrido() }}%</span>
+      </div>
+    </div>
+
+    <!-- Recommendation -->
+    @if (recommendation(); as rec) {
+      <div class="rec-block" [class]="'cls-' + rec.cls">
+        <span class="rec-icon">{{ rec.icon }}</span>
+        <div class="rec-text">
+          <div class="rec-title" [class]="'cls-' + rec.cls">{{ rec.title }}</div>
+          <div class="rec-desc">{{ rec.desc }}</div>
+        </div>
+      </div>
+    } @else {
+      <div class="rec-block cls-idle">
+        <span class="rec-icon">💡</span>
+        <div class="rec-text">
+          <div class="rec-title cls-idle">Sin resultado</div>
+          <div class="rec-desc">Inicia la cámara y analiza una fruta para ver la recomendación.</div>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

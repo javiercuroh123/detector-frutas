@@ -1,0 +1,199 @@
+/* ── Stat rows ── */
+.stat-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+  }
+
+  &.cls-maduro  { &::before { background: var(--accent); }         &:hover { border-color: rgba(74, 222, 128, 0.3); } }
+  &.cls-verde   { &::before { background: var(--accent-yellow); }  &:hover { border-color: rgba(251, 191, 36, 0.3); } }
+  &.cls-podrido { &::before { background: var(--accent-red); }     &:hover { border-color: rgba(248, 113, 113, 0.3); } }
+}
+
+.stat-emoji { font-size: 20px; flex-shrink: 0; }
+
+.stat-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.stat-name {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.stat-count {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+  transition: color 0.3s;
+
+  &.cls-maduro  { color: var(--accent); }
+  &.cls-verde   { color: var(--accent-yellow); }
+  &.cls-podrido { color: var(--accent-red); }
+}
+
+.stat-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.stat-pct {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-2);
+}
+
+.stat-bar {
+  width: 60px;
+  height: 4px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 50px;
+  transition: width 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.cls-maduro  { background: var(--accent); }
+  &.cls-verde   { background: var(--accent-yellow); }
+  &.cls-podrido { background: var(--accent-red); }
+}
+
+/* ── Footer ── */
+.stats-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.total-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.total-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.total-count {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-2);
+  letter-spacing: -0.5px;
+}
+
+.btn-sm {
+  padding: 7px 13px;
+  font-size: 11.5px;
+}
+
+/* ── History ── */
+.history-panel { margin-top: 0; }
+
+.history-body { padding: 14px 16px; }
+
+.history-empty {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  text-align: center;
+  padding: 8px 0;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hover) transparent;
+}
+
+.history-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  animation: fadein-up 0.3s ease;
+  transition: border-color 0.2s;
+
+  &.cls-maduro  { border-color: rgba(74, 222, 128, 0.2);  &:hover { border-color: rgba(74, 222, 128, 0.4); } }
+  &.cls-verde   { border-color: rgba(251, 191, 36, 0.2);  &:hover { border-color: rgba(251, 191, 36, 0.4); } }
+  &.cls-podrido { border-color: rgba(248, 113, 113, 0.2); &:hover { border-color: rgba(248, 113, 113, 0.4); } }
+}
+
+.h-emoji { font-size: 18px; flex-shrink: 0; }
+
+.h-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.h-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+
+  &.cls-maduro  { color: var(--accent); }
+  &.cls-verde   { color: var(--accent-yellow); }
+  &.cls-podrido { color: var(--accent-red); }
+}
+
+.h-meta {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+}

@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Detector de Calidad de Frutas — SENATI</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg-base: #0a0e0b;
+    --bg-card: #111714;
+    --bg-card2: #161d18;
+    --bg-glass: rgba(20,30,22,0.7);
+    --border: rgba(80,160,80,0.15);
+    --border-bright: rgba(80,160,80,0.4);
+    --accent-green: #4ade80;
+    --accent-lime: #a3e635;
+    --accent-yellow: #fbbf24;
+    --accent-red: #f87171;
+    --accent-teal: #34d399;
+    --text-primary: #e8f5e9;
+    --text-secondary: #6b9e72;
+    --text-muted: #3d6b45;
+    --font-display: 'Outfit', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow-glow: 0 0 40px rgba(74,222,128,0.08);
+    --shadow-card: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-display);
+    background: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(74,222,128,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(52,211,153,0.04) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234ade80' fill-opacity='0.015'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Header ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    background: rgba(10,14,11,0.8);
+  }
+
+  .logo-block { display: flex; align-items: center; gap: 14px; }
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #4ade80, #166534);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 20px rgba(74,222,128,0.3);
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%,100% { box-shadow: 0 0 20px rgba(74,222,128,0.3); }
+    50%      { box-shadow: 0 0 36px rgba(74,222,128,0.6); }
+  }
+
+  .logo-text h1 {
+    font-size: 17px; font-weight: 700; letter-spacing: -0.3px;
+    color: var(--text-primary);
+  }
+  .logo-text span {
+    font-family: var(--font-mono);
+    font-size: 10px; color: var(--text-muted); letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .header-badges { display: flex; gap: 8px; }
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 50px;
+    border: 1px solid var(--border-bright);
+    color: var(--text-secondary);
+    background: rgba(74,222,128,0.05);
+  }
+  .badge.live {
+    border-color: rgba(74,222,128,0.6);
+    color: var(--accent-green);
+    background: rgba(74,222,128,0.1);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .badge.live::before {
+    content: '';
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent-green);
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* ── Layout ── */
+  main {
+    position: relative; z-index: 1;
+    padding: 28px 32px;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: auto 1fr;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ── Panels ── */
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .panel:hover { border-color: var(--border-bright); }
+
+  .panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .panel-title {
+    font-family: var(--font-mono);
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel-title .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent-green);
+  }
+
+  /* ── Camera panel ── */
+  .camera-panel { grid-row: span 2; }
+
+  .camera-viewport {
+    position: relative;
+    background: #060907;
+    aspect-ratio: 4/3;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .camera-viewport video,
+  .camera-viewport img#preview-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: none;
+  }
+  .camera-viewport video.active,
+  .camera-viewport img#preview-img.active { display: block; }
+
+  .camera-placeholder {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 12px;
+    color: var(--text-muted);
+    transition: opacity 0.3s;
+  }
+  .camera-placeholder.hidden { display: none; }
+  .camera-placeholder .big-icon { font-size: 52px; opacity: 0.4; }
+  .camera-placeholder p {
+    font-size: 12px; font-family: var(--font-mono);
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+
+  /* Scan overlay */
+  .scan-overlay {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    display: none;
+  }
+  .scan-overlay.active { display: block; }
+  .scan-line {
+    position: absolute; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-green), transparent);
+    animation: scan 2s linear infinite;
+    box-shadow: 0 0 12px rgba(74,222,128,0.8);
+  }
+  @keyframes scan {
+    0%  { top: 0%; }
+    100%{ top: 100%; }
+  }
+  .corner {
+    position: absolute;
+    width: 28px; height: 28px;
+    border-color: var(--accent-green);
+    border-style: solid;
+    opacity: 0.8;
+  }
+  .corner.tl { top:12px; left:12px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
+  .corner.tr { top:12px; right:12px; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
+  .corner.bl { bottom:12px; left:12px; border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
+  .corner.br { bottom:12px; right:12px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+
+  /* Camera controls */
+  .camera-controls {
+    padding: 16px 20px;
+    display: flex; gap: 10px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .btn {
+    font-family: var(--font-display);
+    font-size: 13px; font-weight: 600;
+    padding: 10px 18px;
+    border: none; border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 7px;
+    transition: all 0.2s;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #166534, #4ade80);
+    color: #0a0e0b;
+    box-shadow: 0 4px 16px rgba(74,222,128,0.25);
+  }
+  .btn-primary:hover { box-shadow: 0 4px 24px rgba(74,222,128,0.45); filter: brightness(1.1); }
+
+  .btn-secondary {
+    background: var(--bg-card2);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-bright);
+  }
+  .btn-secondary:hover { background: rgba(74,222,128,0.08); color: var(--accent-green); border-color: var(--accent-green); }
+
+  .btn-danger {
+    background: rgba(248,113,113,0.1);
+    color: var(--accent-red);
+    border: 1px solid rgba(248,113,113,0.3);
+  }
+  .btn-danger:hover { background: rgba(248,113,113,0.18); }
+
+  .btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none !important; filter: none !important; }
+
+  #file-input { display: none; }
+
+  /* Fruit selector */
+  .fruit-selector {
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .fruit-selector label {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .fruit-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .fruit-chip {
+    padding: 5px 12px; border-radius: 50px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12px; font-family: var(--font-display); font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .fruit-chip:hover,
+  .fruit-chip.active {
+    background: rgba(74,222,128,0.12);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+  }
+
+  /* ── Result panel ── */
+  .result-panel .panel-body { padding: 24px 20px; }
+
+  .result-state {
+    text-align: center;
+    padding: 20px 10px;
+    position: relative;
+  }
+
+  .result-icon-wrap {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 38px;
+    position: relative;
+    transition: all 0.4s;
+  }
+  .result-icon-wrap.idle {
+    background: rgba(255,255,255,0.04);
+    border: 2px solid rgba(255,255,255,0.07);
+  }
+  .result-icon-wrap.maduro {
+    background: rgba(74,222,128,0.15);
+    border: 2px solid rgba(74,222,128,0.5);
+    box-shadow: 0 0 30px rgba(74,222,128,0.25);
+    animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .result-icon-wrap.verde-f {
+    background: rgba(251,191,36,0.15);
+    border: 2px solid rgba(251,191,36,0.5);
+    box-shadow: 0 0 30px rgba(251,191,36,0.2);
+    animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .result-icon-wrap.podrido {
+    background: rgba(248,113,113,0.15);
+    border: 2px solid rgba(248,113,113,0.5);
+    box-shadow: 0 0 30px rgba(248,113,113,0.25);
+    animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes pop {
+    0%  { transform: scale(0.6); opacity:0; }
+    100%{ transform: scale(1); opacity:1; }
+  }
+
+  .result-label {
+    font-size: 26px; font-weight: 900; letter-spacing: -0.5px;
+    text-transform: uppercase;
+    transition: color 0.4s;
+  }
+  .result-label.idle    { color: var(--text-muted); }
+  .result-label.maduro  { color: var(--accent-green); }
+  .result-label.verde-f { color: var(--accent-yellow); }
+  .result-label.podrido { color: var(--accent-red); }
+
+  .result-sub {
+    font-size: 11px; font-family: var(--font-mono);
+    color: var(--text-muted); letter-spacing: 1px; margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  /* Confidence bar */
+  .confidence-block { margin-top: 20px; }
+  .confidence-label {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .confidence-label span:first-child {
+    font-size: 10px; font-family: var(--font-mono);
+    color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .confidence-value {
+    font-size: 22px; font-weight: 700; font-family: var(--font-mono);
+    transition: color 0.4s;
+  }
+  .confidence-value.maduro  { color: var(--accent-green); }
+  .confidence-value.verde-f { color: var(--accent-yellow); }
+  .confidence-value.podrido { color: var(--accent-red); }
+  .confidence-value.idle    { color: var(--text-muted); }
+
+  .confidence-bar-track {
+    height: 8px; border-radius: 50px;
+    background: rgba(255,255,255,0.06);
+    overflow: hidden;
+  }
+  .confidence-bar-fill {
+    height: 100%; border-radius: 50px;
+    width: 0%;
+    transition: width 0.7s cubic-bezier(0.4,0,0.2,1), background 0.4s;
+  }
+  .confidence-bar-fill.maduro  { background: linear-gradient(90deg, #166534, #4ade80); }
+  .confidence-bar-fill.verde-f { background: linear-gradient(90deg, #92400e, #fbbf24); }
+  .confidence-bar-fill.podrido { background: linear-gradient(90deg, #7f1d1d, #f87171); }
+
+  /* Probabilities mini bars */
+  .probs-block { margin-top: 16px; }
+  .prob-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 7px;
+  }
+  .prob-name {
+    font-size: 10px; font-family: var(--font-mono);
+    color: var(--text-muted); width: 60px;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .prob-track {
+    flex: 1; height: 4px; border-radius: 50px;
+    background: rgba(255,255,255,0.05);
+    overflow: hidden;
+  }
+  .prob-fill { height: 100%; border-radius: 50px; transition: width 0.6s ease; }
+  .prob-fill.maduro  { background: var(--accent-green); }
+  .prob-fill.verde-f { background: var(--accent-yellow); }
+  .prob-fill.podrido { background: var(--accent-red); }
+  .prob-pct {
+    font-size: 10px; font-family: var(--font-mono);
+    color: var(--text-secondary); width: 32px; text-align: right;
+  }
+
+  /* Recommendation */
+  .recommendation-block {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.4s;
+    min-height: 54px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .recommendation-block.maduro  { background: rgba(74,222,128,0.07); border-color: rgba(74,222,128,0.25); }
+  .recommendation-block.verde-f { background: rgba(251,191,36,0.07); border-color: rgba(251,191,36,0.25); }
+  .recommendation-block.podrido { background: rgba(248,113,113,0.07); border-color: rgba(248,113,113,0.25); }
+  .recommendation-block.warn    { background: rgba(251,191,36,0.07); border-color: rgba(251,191,36,0.25); }
+
+  .rec-icon { font-size: 22px; flex-shrink: 0; }
+  .rec-text { flex: 1; }
+  .rec-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .rec-title.maduro  { color: var(--accent-green); }
+  .rec-title.verde-f { color: var(--accent-yellow); }
+  .rec-title.podrido { color: var(--accent-red); }
+  .rec-title.warn    { color: var(--accent-yellow); }
+  .rec-title.idle    { color: var(--text-muted); }
+  .rec-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+  /* ── Stats panel ── */
+  .stats-panel .panel-body { padding: 18px 20px; }
+
+  .stat-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-row::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+  }
+  .stat-row.maduro::before  { background: var(--accent-green); }
+  .stat-row.verde-f::before { background: var(--accent-yellow); }
+  .stat-row.podrido::before { background: var(--accent-red); }
+
+  .stat-emoji { font-size: 20px; }
+  .stat-info { flex: 1; }
+  .stat-name { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; }
+  .stat-count {
+    font-size: 24px; font-weight: 900; letter-spacing: -1px;
+    transition: color 0.3s;
+  }
+  .stat-row.maduro  .stat-count { color: var(--accent-green); }
+  .stat-row.verde-f .stat-count { color: var(--accent-yellow); }
+  .stat-row.podrido .stat-count { color: var(--accent-red); }
+
+  .stat-bar-mini {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-family: var(--font-mono); color: var(--text-muted);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Total & reset */
+  .stats-footer {
+    margin-top: 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .total-label { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; }
+  .total-value { font-size: 20px; font-weight: 700; color: var(--text-secondary); }
+
+  /* ── Progress / Loading ── */
+  .analyzing-overlay {
+    position: absolute; inset: 0;
+    background: rgba(10,14,11,0.88);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 16px;
+    z-index: 20;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(4px);
+  }
+  .analyzing-overlay.active { opacity: 1; pointer-events: all; }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 3px solid rgba(74,222,128,0.15);
+    border-top-color: var(--accent-green);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .analyzing-text {
+    font-size: 11px; font-family: var(--font-mono);
+    color: var(--accent-green); letter-spacing: 2px; text-transform: uppercase;
+  }
+  .analyzing-sub {
+    font-size: 9px; font-family: var(--font-mono);
+    color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;
+    margin-top: -8px;
+  }
+
+  /* ── Model status bar ── */
+  .model-status {
+    margin: 0 32px 20px;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11px; font-family: var(--font-mono);
+    color: var(--text-muted); letter-spacing: 1px;
+  }
+  .model-status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent-green);
+    flex-shrink: 0;
+    animation: blink 2s ease-in-out infinite;
+  }
+  .model-status strong { color: var(--accent-teal); }
+  .model-status .sep { color: rgba(255,255,255,0.1); margin: 0 4px; }
+
+  /* ── History ── */
+  .history-panel { grid-column: span 2; }
+  .history-panel .panel-body { padding: 16px 20px; }
+  .history-list {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .history-item {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    font-size: 11px; font-family: var(--font-mono);
+    transition: all 0.2s;
+    animation: fadein 0.4s ease;
+    min-width: 80px;
+  }
+  @keyframes fadein { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
+  .history-item .h-fruit { font-size: 20px; }
+  .history-item .h-state { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
+  .history-item .h-conf { font-size: 9px; color: var(--text-muted); }
+  .history-item.maduro  { border-color: rgba(74,222,128,0.3); }
+  .history-item.verde-f { border-color: rgba(251,191,36,0.3); }
+  .history-item.podrido { border-color: rgba(248,113,113,0.3); }
+  .history-item .h-state.maduro  { color: var(--accent-green); }
+  .history-item .h-state.verde-f { color: var(--accent-yellow); }
+  .history-item .h-state.podrido { color: var(--accent-red); }
+  .history-empty {
+    font-size: 11px; font-family: var(--font-mono);
+    color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;
+    padding: 8px 0;
+  }
+
+  /* ── Responsive ── */
+  @media(max-width: 800px) {
+    main { grid-template-columns: 1fr; padding: 16px; }
+    .camera-panel { grid-row: auto; }
+    .history-panel { grid-column: span 1; }
+    header { padding: 14px 16px; }
+    .header-badges { display: none; }
+    .model-status { margin: 0 16px 16px; }
+  }
+
+  /* ── Demo fruit images (emoji based, no external images needed) ── */
+  .demo-fruits {
+    padding: 12px 20px;
+    display: flex; gap: 8px; align-items: center;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+  }
+  .demo-label {
+    font-family: var(--font-mono); font-size: 9px;
+    color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .demo-btn {
+    padding: 6px 12px; border-radius: 8px;
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 13px; cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .demo-btn span { font-size: 9px; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .demo-btn:hover { background: rgba(74,222,128,0.08); border-color: var(--border-bright); }
+  .demo-btn.maduro:hover  { border-color: rgba(74,222,128,0.5); }
+  .demo-btn.verde-f:hover { border-color: rgba(251,191,36,0.5); }
+  .demo-btn.podrido:hover { border-color: rgba(248,113,113,0.5); }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--bg-card2); border: 1px solid var(--border-bright);
+    color: var(--text-primary); border-radius: 10px;
+    padding: 10px 20px; font-size: 12px; font-family: var(--font-mono);
+    letter-spacing: 1px; z-index: 1000;
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s;
+    opacity: 0;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header>
+  <div class="logo-block">
+    <div class="logo-icon">🍃</div>
+    <div class="logo-text">
+      <h1>Detector de Calidad de Frutas</h1>
+      <span>SENATI · Taller ML · Semestre V · TensorFlow.js + Angular 21</span>
+    </div>
+  </div>
+  <div class="header-badges">
+    <div class="badge live">Modelo activo</div>
+    <div class="badge">MobileNetV2</div>
+    <div class="badge">TF.js</div>
+  </div>
+</header>
+
+<!-- Model status bar -->
+<div class="model-status">
+  <div class="model-status-dot"></div>
+  <span>Modelo cargado desde <strong>/assets/model/model.json</strong>
+  <span class="sep">|</span> Input: <strong>224×224×3</strong>
+  <span class="sep">|</span> Clases: <strong>maduro · verde · podrido</strong>
+  <span class="sep">|</span> Inferencia: <strong>&lt;1s</strong>
+  <span class="sep">|</span> Privacidad: <strong>100% local</strong></span>
+</div>
+
+<!-- ══ MAIN GRID ══ -->
+<main>
+
+  <!-- Camera Panel -->
+  <div class="panel camera-panel">
+    <div class="panel-header">
+      <div class="panel-title"><div class="dot"></div>Visor de cámara</div>
+      <div class="badge" id="camera-status-badge">Sin cámara</div>
+    </div>
+
+    <!-- Fruit selector -->
+    <div class="fruit-selector">
+      <label>Fruta:</label>
+      <div class="fruit-chips">
+        <div class="fruit-chip active" data-fruit="plátano">🍌 Plátano</div>
+        <div class="fruit-chip" data-fruit="mango">🥭 Mango</div>
+        <div class="fruit-chip" data-fruit="fresa">🍓 Fresa</div>
+        <div class="fruit-chip" data-fruit="naranja">🍊 Naranja</div>
+        <div class="fruit-chip" data-fruit="manzana">🍎 Manzana</div>
+      </div>
+    </div>
+
+    <!-- Viewport -->
+    <div class="camera-viewport" id="viewport">
+      <video id="camera-video" autoplay muted playsinline></video>
+      <img id="preview-img" alt="preview" />
+      <div class="camera-placeholder" id="placeholder">
+        <div class="big-icon">📷</div>
+        <p>Inicia la cámara o carga una imagen</p>
+      </div>
+
+      <!-- Scan overlay -->
+      <div class="scan-overlay" id="scan-overlay">
+        <div class="scan-line"></div>
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+      </div>
+
+      <!-- Analyzing overlay -->
+      <div class="analyzing-overlay" id="analyzing-overlay">
+        <div class="spinner"></div>
+        <div class="analyzing-text">Analizando</div>
+        <div class="analyzing-sub">Ejecutando inferencia TF.js…</div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="camera-controls">
+      <button class="btn btn-primary" id="btn-camera">📷 Iniciar cámara</button>
+      <button class="btn btn-secondary" id="btn-analyze" disabled>🔍 Analizar</button>
+      <button class="btn btn-secondary" id="btn-upload" onclick="document.getElementById('file-input').click()">📁 Cargar imagen</button>
+      <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" />
+      <button class="btn btn-danger" id="btn-stop" disabled>⏹ Detener</button>
+    </div>
+
+    <!-- Demo scenarios -->
+    <div class="demo-fruits">
+      <span class="demo-label">Simular:</span>
+      <button class="demo-btn maduro" onclick="runDemoClassification('maduro')">🍌 <span>Maduro</span></button>
+      <button class="demo-btn verde-f" onclick="runDemoClassification('verde-f')">🥭 <span>Verde</span></button>
+      <button class="demo-btn podrido" onclick="runDemoClassification('podrido')">🍎 <span>Podrido</span></button>
+      <button class="demo-btn" onclick="runDemoClassification('low')">⚠️ <span>Baja conf.</span></button>
+    </div>
+  </div>
+
+  <!-- Result Panel -->
+  <div class="panel result-panel">
+    <div class="panel-header">
+      <div class="panel-title"><div class="dot"></div>Resultado</div>
+      <div class="badge" id="inference-time">—</div>
+    </div>
+    <div class="panel-body">
+
+      <div class="result-state">
+        <div class="result-icon-wrap idle" id="result-icon">❓</div>
+        <div class="result-label idle" id="result-label">Esperando</div>
+        <div class="result-sub" id="result-sub">Apunta la cámara a una fruta</div>
+      </div>
+
+      <!-- Confidence -->
+      <div class="confidence-block">
+        <div class="confidence-label">
+          <span>Confianza</span>
+          <span class="confidence-value idle" id="conf-value">—</span>
+        </div>
+        <div class="confidence-bar-track">
+          <div class="confidence-bar-fill" id="conf-bar"></div>
+        </div>
+      </div>
+
+      <!-- Probability breakdown -->
+      <div class="probs-block">
+        <div class="prob-row">
+          <span class="prob-name">Maduro</span>
+          <div class="prob-track"><div class="prob-fill maduro" id="prob-maduro" style="width:0%"></div></div>
+          <span class="prob-pct" id="pct-maduro">0%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-name">Verde</span>
+          <div class="prob-track"><div class="prob-fill verde-f" id="prob-verde" style="width:0%"></div></div>
+          <span class="prob-pct" id="pct-verde">0%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-name">Podrido</span>
+          <div class="prob-track"><div class="prob-fill podrido" id="prob-podrido" style="width:0%"></div></div>
+          <span class="prob-pct" id="pct-podrido">0%</span>
+        </div>
+      </div>
+
+      <!-- Recommendation -->
+      <div class="recommendation-block" id="rec-block">
+        <div class="rec-icon" id="rec-icon">💡</div>
+        <div class="rec-text">
+          <div class="rec-title idle" id="rec-title">Sin resultado</div>
+          <div class="rec-desc" id="rec-desc">Inicia la cámara y analiza una fruta para ver la recomendación.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Stats Panel -->
+  <div class="panel stats-panel">
+    <div class="panel-header">
+      <div class="panel-title"><div class="dot"></div>Estadísticas de sesión</div>
+    </div>
+    <div class="panel-body">
+
+      <div class="stat-row maduro">
+        <span class="stat-emoji">🍌</span>
+        <div class="stat-info">
+          <div class="stat-name">Maduros</div>
+          <div class="stat-count" id="count-maduro">0</div>
+        </div>
+        <div class="stat-bar-mini" id="pct-session-maduro">0%</div>
+      </div>
+      <div class="stat-row verde-f">
+        <span class="stat-emoji">🥭</span>
+        <div class="stat-info">
+          <div class="stat-name">Verdes</div>
+          <div class="stat-count" id="count-verde">0</div>
+        </div>
+        <div class="stat-bar-mini" id="pct-session-verde">0%</div>
+      </div>
+      <div class="stat-row podrido">
+        <span class="stat-emoji">🍎</span>
+        <div class="stat-info">
+          <div class="stat-name">Podridos</div>
+          <div class="stat-count" id="count-podrido">0</div>
+        </div>
+        <div class="stat-bar-mini" id="pct-session-podrido">0%</div>
+      </div>
+
+      <div class="stats-footer">
+        <div>
+          <div class="total-label">Total analizadas</div>
+          <div class="total-value" id="count-total">0</div>
+        </div>
+        <button class="btn btn-danger" onclick="resetStats()" style="padding:8px 14px;font-size:12px;">🔄 Reiniciar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Panel -->
+  <div class="panel history-panel">
+    <div class="panel-header">
+      <div class="panel-title"><div class="dot"></div>Historial de análisis</div>
+      <div class="badge" id="history-count">0 registros</div>
+    </div>
+    <div class="panel-body">
+      <div class="history-list" id="history-list">
+        <div class="history-empty" id="history-empty">— sin análisis aún —</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+const state = {
+  cameraActive: false,
+  stream: null,
+  currentFruit: 'plátano',
+  stats: { maduro: 0, 'verde-f': 0, podrido: 0 },
+  history: []
+};
+
+// ══════════════════════════════════════════════
+// MOCK MODEL — simulates TF.js inference
+// ══════════════════════════════════════════════
+function mockPredict(scenario) {
+  const scenarios = {
+    'maduro':  () => {
+      const m = 0.72 + Math.random() * 0.25;
+      const v = (1-m) * Math.random() * 0.7;
+      const p = 1 - m - v;
+      return [Math.max(0,m), Math.max(0,v), Math.max(0,p)];
+    },
+    'verde-f': () => {
+      const v = 0.65 + Math.random() * 0.30;
+      const m = (1-v) * Math.random() * 0.6;
+      const p = 1 - v - m;
+      return [Math.max(0,m), Math.max(0,v), Math.max(0,p)];
+    },
+    'podrido': () => {
+      const p = 0.68 + Math.random() * 0.28;
+      const m = (1-p) * Math.random() * 0.5;
+      const v = 1 - p - m;
+      return [Math.max(0,m), Math.max(0,v), Math.max(0,p)];
+    },
+    'low': () => {
+      const a = Math.random(), b = Math.random(), c = Math.random();
+      const t = a+b+c;
+      // shuffle to get low confidence
+      return [a/t * 0.55, b/t * 0.55, c/t * 0.55].map((x,i,arr) => {
+        const s = arr.reduce((a,b)=>a+b,0); return x/s;
+      });
+    },
+    'random': () => {
+      const picks = ['maduro','verde-f','podrido'];
+      return mockPredict(picks[Math.floor(Math.random()*picks.length)]);
+    }
+  };
+  const fn = scenarios[scenario] || scenarios.random;
+  let probs = fn();
+  // normalize
+  const sum = probs.reduce((a,b)=>a+b,0);
+  probs = probs.map(p=>p/sum);
+  return probs;
+}
+
+// ══════════════════════════════════════════════
+// UI HELPERS
+// ══════════════════════════════════════════════
+const CLASS_MAP = {
+  'maduro':  { label:'MADURO',  icon:'✅', recIcon:'🛒', recTitle:'Listo para la venta',  recDesc:'La fruta está en su punto óptimo. Puede comercializarse o consumirse de inmediato.', emoji: fruitEmoji('maduro') },
+  'verde-f': { label:'VERDE',   icon:'⏳', recIcon:'⏰', recTitle:'Esperar maduración',   recDesc:'La fruta no ha alcanzado su punto óptimo. Se recomienda esperar entre 2-5 días antes de comercializar.', emoji: fruitEmoji('verde-f') },
+  'podrido': { label:'PODRIDO', icon:'🚫', recIcon:'🗑️', recTitle:'Descartar / No apto',  recDesc:'La fruta presenta deterioro avanzado. No es apta para la venta ni consumo. Desechar inmediatamente.', emoji: fruitEmoji('podrido') }
+};
+
+function fruitEmoji(state) {
+  const map = {
+    'plátano':  { 'maduro':'🍌', 'verde-f':'🫛', 'podrido':'🤢' },
+    'mango':    { 'maduro':'🥭', 'verde-f':'🫒', 'podrido':'🤢' },
+    'fresa':    { 'maduro':'🍓', 'verde-f':'🌱', 'podrido':'🤢' },
+    'naranja':  { 'maduro':'🍊', 'verde-f':'🟢', 'podrido':'🤢' },
+    'manzana':  { 'maduro':'🍎', 'verde-f':'🍏', 'podrido':'🤢' },
+  };
+  return (s) => (map[state.currentFruit] || map['plátano'])[s];
+}
+
+function toast(msg, dur=2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ══════════════════════════════════════════════
+// CLASSIFICATION RESULT RENDER
+// ══════════════════════════════════════════════
+function renderResult(probs, inferenceMs) {
+  const labels = ['maduro','verde-f','podrido'];
+  const maxIdx = probs.indexOf(Math.max(...probs));
+  const winClass = labels[maxIdx];
+  const confidence = probs[maxIdx];
+  const isLowConf = confidence < 0.60;
+
+  const info = CLASS_MAP[winClass];
+  const finalClass = isLowConf ? null : winClass;
+
+  // Icon
+  const iconEl = document.getElementById('result-icon');
+  iconEl.textContent = isLowConf ? '⚠️' : info.icon;
+  iconEl.className = 'result-icon-wrap ' + (isLowConf ? 'verde-f' : winClass);
+
+  // Label
+  const labelEl = document.getElementById('result-label');
+  labelEl.textContent = isLowConf ? 'INCIERTO' : info.label;
+  labelEl.className = 'result-label ' + (isLowConf ? 'verde-f' : winClass);
+
+  // Sub
+  document.getElementById('result-sub').textContent =
+    isLowConf ? 'Confianza baja — mejore la iluminación' : state.currentFruit.toUpperCase();
+
+  // Confidence
+  const confPct = Math.round(confidence * 100);
+  const confEl = document.getElementById('conf-value');
+  confEl.textContent = confPct + '%';
+  confEl.className = 'confidence-value ' + (isLowConf ? 'verde-f' : winClass);
+  const fillEl = document.getElementById('conf-bar');
+  fillEl.style.width = confPct + '%';
+  fillEl.className = 'confidence-bar-fill ' + (isLowConf ? 'verde-f' : winClass);
+
+  // Probs breakdown
+  ['maduro','verde-f','podrido'].forEach((cl,i) => {
+    const pct = Math.round(probs[i]*100);
+    const key = cl.replace('-f','');
+    document.getElementById('prob-'+key).style.width = pct+'%';
+    document.getElementById('pct-'+key).textContent = pct+'%';
+  });
+
+  // Inference badge
+  document.getElementById('inference-time').textContent = inferenceMs+'ms';
+
+  // Recommendation
+  const recBlock = document.getElementById('rec-block');
+  const recIcon  = document.getElementById('rec-icon');
+  const recTitle = document.getElementById('rec-title');
+  const recDesc  = document.getElementById('rec-desc');
+
+  if (isLowConf) {
+    recBlock.className = 'recommendation-block warn';
+    recIcon.textContent = '💡';
+    recTitle.className = 'rec-title warn';
+    recTitle.textContent = 'Repetir captura';
+    recDesc.textContent = 'La confianza es menor al 60%. Mejore la iluminación y asegúrese de que la fruta ocupe el encuadre completo.';
+  } else {
+    recBlock.className = 'recommendation-block ' + winClass;
+    recIcon.textContent = info.recIcon;
+    recTitle.className = 'rec-title ' + winClass;
+    recTitle.textContent = info.recTitle;
+    recDesc.textContent = info.recDesc;
+  }
+
+  // Stats (only if confidence >= 60%)
+  if (!isLowConf) {
+    state.stats[winClass]++;
+    updateStats();
+    addHistory(winClass, confPct);
+  }
+}
+
+function updateStats() {
+  const total = Object.values(state.stats).reduce((a,b)=>a+b,0);
+  document.getElementById('count-maduro').textContent = state.stats['maduro'];
+  document.getElementById('count-verde').textContent  = state.stats['verde-f'];
+  document.getElementById('count-podrido').textContent= state.stats['podrido'];
+  document.getElementById('count-total').textContent  = total;
+
+  const labels = ['maduro','verde-f','podrido'];
+  const ids    = ['maduro','verde','podrido'];
+  labels.forEach((cl,i) => {
+    const pct = total > 0 ? Math.round(state.stats[cl]/total*100) : 0;
+    document.getElementById('pct-session-'+ids[i]).textContent = pct+'%';
+  });
+}
+
+function addHistory(cls, conf) {
+  const empty = document.getElementById('history-empty');
+  if (empty) empty.remove();
+
+  const emojis = {
+    'plátano': { 'maduro':'🍌','verde-f':'🫛','podrido':'🤢' },
+    'mango':   { 'maduro':'🥭','verde-f':'🫒','podrido':'🤢' },
+    'fresa':   { 'maduro':'🍓','verde-f':'🌱','podrido':'🤢' },
+    'naranja': { 'maduro':'🍊','verde-f':'🟢','podrido':'🤢' },
+    'manzana': { 'maduro':'🍎','verde-f':'🍏','podrido':'🤢' },
+  };
+  const fruitMap = emojis[state.currentFruit] || emojis['plátano'];
+  const emoji = fruitMap[cls] || '🍑';
+  const labels = { 'maduro':'Maduro','verde-f':'Verde','podrido':'Podrido' };
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+
+  const item = document.createElement('div');
+  item.className = 'history-item '+cls;
+  item.innerHTML = `
+    <div class="h-fruit">${emoji}</div>
+    <div class="h-state ${cls}">${labels[cls]}</div>
+    <div class="h-conf">${conf}% · ${time}</div>
+  `;
+
+  const list = document.getElementById('history-list');
+  list.insertBefore(item, list.firstChild);
+
+  // Keep max 20
+  while (list.children.length > 20) list.removeChild(list.lastChild);
+
+  document.getElementById('history-count').textContent = list.children.length + ' registros';
+}
+
+function resetStats() {
+  state.stats = { maduro:0, 'verde-f':0, podrido:0 };
+  state.history = [];
+  updateStats();
+  const list = document.getElementById('history-list');
+  list.innerHTML = '<div class="history-empty" id="history-empty">— sin análisis aún —</div>';
+  document.getElementById('history-count').textContent = '0 registros';
+  toast('📊 Estadísticas reiniciadas');
+}
+
+// ══════════════════════════════════════════════
+// DEMO CLASSIFICATION (mock inference)
+// ══════════════════════════════════════════════
+function runDemoClassification(scenario) {
+  const overlay = document.getElementById('analyzing-overlay');
+  overlay.classList.add('active');
+  const scanOverlay = document.getElementById('scan-overlay');
+  scanOverlay.classList.add('active');
+
+  const t0 = performance.now();
+  // Simulate inference time (120–700ms)
+  const delay = 300 + Math.random() * 400;
+
+  setTimeout(() => {
+    const probs = mockPredict(scenario);
+    const inferenceMs = Math.round(performance.now() - t0);
+    overlay.classList.remove('active');
+    renderResult(probs, inferenceMs);
+    setTimeout(() => scanOverlay.classList.remove('active'), 800);
+  }, delay);
+}
+
+// ══════════════════════════════════════════════
+// CAMERA
+// ══════════════════════════════════════════════
+const btnCamera  = document.getElementById('btn-camera');
+const btnAnalyze = document.getElementById('btn-analyze');
+const btnStop    = document.getElementById('btn-stop');
+const videoEl    = document.getElementById('camera-video');
+const prevImg    = document.getElementById('preview-img');
+const placeholder= document.getElementById('placeholder');
+
+btnCamera.addEventListener('click', async () => {
+  if (state.cameraActive) return;
+  try {
+    state.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode:'environment' } });
+    videoEl.srcObject = state.stream;
+    videoEl.classList.add('active');
+    prevImg.classList.remove('active');
+    placeholder.classList.add('hidden');
+    state.cameraActive = true;
+    btnCamera.disabled = true;
+    btnAnalyze.disabled = false;
+    btnStop.disabled = false;
+    document.getElementById('camera-status-badge').textContent = '● En vivo';
+    document.getElementById('camera-status-badge').style.color = 'var(--accent-green)';
+    toast('📷 Cámara activada');
+  } catch(e) {
+    toast('⚠️ Permiso de cámara denegado — usa "Cargar imagen"');
+  }
+});
+
+btnStop.addEventListener('click', () => {
+  if (state.stream) {
+    state.stream.getTracks().forEach(t => t.stop());
+    state.stream = null;
+  }
+  videoEl.srcObject = null;
+  videoEl.classList.remove('active');
+  placeholder.classList.remove('hidden');
+  state.cameraActive = false;
+  btnCamera.disabled = false;
+  btnAnalyze.disabled = true;
+  btnStop.disabled = true;
+  document.getElementById('camera-status-badge').textContent = 'Sin cámara';
+  document.getElementById('camera-status-badge').style.color = '';
+  document.getElementById('scan-overlay').classList.remove('active');
+});
+
+btnAnalyze.addEventListener('click', () => {
+  runDemoClassification('random');
+});
+
+// File upload
+document.getElementById('file-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    prevImg.src = ev.target.result;
+    prevImg.classList.add('active');
+    videoEl.classList.remove('active');
+    placeholder.classList.add('hidden');
+    btnAnalyze.disabled = false;
+    document.getElementById('camera-status-badge').textContent = 'Imagen cargada';
+    toast('🖼️ Imagen lista — presiona Analizar');
+    // Auto-analyze
+    setTimeout(() => runDemoClassification('random'), 500);
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+// ══════════════════════════════════════════════
+// FRUIT CHIPS
+// ══════════════════════════════════════════════
+document.querySelectorAll('.fruit-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.fruit-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    state.currentFruit = chip.dataset.fruit;
+    toast('🍑 Fruta seleccionada: ' + chip.textContent.trim());
+  });
+});
+</script>
+</body>
+</html>

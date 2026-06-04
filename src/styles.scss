@@ -1,1 +1,193 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --bg: #070d09;
+  --bg-card: #0c1410;
+  --bg-card2: #101910;
+  --border: rgba(74, 222, 128, 0.10);
+  --border-hover: rgba(74, 222, 128, 0.28);
+  --accent: #4ade80;
+  --accent-dim: #22c55e;
+  --accent-teal: #34d399;
+  --accent-yellow: #fbbf24;
+  --accent-red: #f87171;
+  --text-1: #e4f0e7;
+  --text-2: #56886a;
+  --text-3: #2c5038;
+  --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.52);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-1);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 65% 45% at 5% -5%, rgba(74, 222, 128, 0.055) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 35% at 95% 100%, rgba(52, 211, 153, 0.04) 0%, transparent 65%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%234ade80' fill-opacity='0.012'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Shared panel structure ── */
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(74, 222, 128, 0.04);
+  }
+}
+
+.panel-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.panel-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    animation: blink 2s ease-in-out infinite;
+  }
+}
+
+.panel-body { padding: 20px; }
+
+/* ── Badges & chips ── */
+.badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 50px;
+  border: 1px solid var(--border-hover);
+  color: var(--text-2);
+  background: rgba(74, 222, 128, 0.04);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Buttons ── */
+.btn {
+  font-family: var(--font);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px 16px;
+  border: none;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.32;
+    cursor: not-allowed;
+    transform: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+  }
+
+  &:not(:disabled):active { transform: scale(0.96); }
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #166534 0%, #4ade80 100%);
+  color: #081509;
+  box-shadow: 0 3px 14px rgba(74, 222, 128, 0.25);
+
+  &:not(:disabled):hover {
+    box-shadow: 0 4px 20px rgba(74, 222, 128, 0.45);
+    filter: brightness(1.08);
+  }
+}
+
+.btn-secondary {
+  background: var(--bg-card2);
+  color: var(--text-2);
+  border: 1px solid var(--border-hover);
+
+  &:not(:disabled):hover {
+    background: rgba(74, 222, 128, 0.07);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+}
+
+.btn-danger {
+  background: rgba(248, 113, 113, 0.08);
+  color: var(--accent-red);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+
+  &:not(:disabled):hover {
+    background: rgba(248, 113, 113, 0.16);
+    border-color: rgba(248, 113, 113, 0.45);
+  }
+}
+
+/* ── Animations ── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(74, 222, 128, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(74, 222, 128, 0.65); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pop {
+  0% { transform: scale(0.65); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadein-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

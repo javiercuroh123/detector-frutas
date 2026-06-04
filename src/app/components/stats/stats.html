@@ -1,0 +1,94 @@
+<!-- Session stats -->
+<div class="panel stats-panel">
+  <div class="panel-header">
+    <div class="panel-title">
+      <span class="dot"></span>
+      Estadísticas de sesión
+    </div>
+  </div>
+
+  <div class="panel-body">
+    <div class="stat-rows">
+
+      <div class="stat-row cls-maduro">
+        <span class="stat-emoji">🍌</span>
+        <div class="stat-info">
+          <span class="stat-name">Maduros</span>
+          <span class="stat-count cls-maduro">{{ stats().maduro }}</span>
+        </div>
+        <div class="stat-right">
+          <span class="stat-pct">{{ pctMaduro() }}%</span>
+          <div class="stat-bar">
+            <div class="stat-bar-fill cls-maduro" [style.width.%]="pctMaduro()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-row cls-verde">
+        <span class="stat-emoji">🥭</span>
+        <div class="stat-info">
+          <span class="stat-name">Verdes</span>
+          <span class="stat-count cls-verde">{{ stats().verde }}</span>
+        </div>
+        <div class="stat-right">
+          <span class="stat-pct">{{ pctVerde() }}%</span>
+          <div class="stat-bar">
+            <div class="stat-bar-fill cls-verde" [style.width.%]="pctVerde()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-row cls-podrido">
+        <span class="stat-emoji">🍎</span>
+        <div class="stat-info">
+          <span class="stat-name">Podridos</span>
+          <span class="stat-count cls-podrido">{{ stats().podrido }}</span>
+        </div>
+        <div class="stat-right">
+          <span class="stat-pct">{{ pctPodrido() }}%</span>
+          <div class="stat-bar">
+            <div class="stat-bar-fill cls-podrido" [style.width.%]="pctPodrido()"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="stats-footer">
+      <div class="total-group">
+        <span class="total-label">Total analizadas</span>
+        <span class="total-count">{{ total() }}</span>
+      </div>
+      <button class="btn btn-danger btn-sm" (click)="resetStats()">🔄 Reiniciar</button>
+    </div>
+  </div>
+</div>
+
+<!-- History -->
+<div class="panel history-panel">
+  <div class="panel-header">
+    <div class="panel-title">
+      <span class="dot"></span>
+      Historial de análisis
+    </div>
+    <span class="badge">{{ history().length }} registros</span>
+  </div>
+
+  <div class="panel-body history-body">
+    @if (history().length === 0) {
+      <div class="history-empty">— sin análisis aún —</div>
+    } @else {
+      <div class="history-list">
+        @for (item of history(); track $index) {
+          <div class="history-chip" [class]="'cls-' + item.cls">
+            <span class="h-emoji">{{ getEmoji(item.fruit, item.cls) }}</span>
+            <div class="h-info">
+              <span class="h-label" [class]="'cls-' + item.cls">{{ clsLabel(item.cls) }}</span>
+              <span class="h-meta">{{ item.confidence }}% · {{ item.time }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

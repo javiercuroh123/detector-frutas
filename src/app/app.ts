@@ -1,12 +1,15 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Camera } from './components/camera/camera';
+import { Result } from './components/result/result';
+import { Stats } from './components/stats/stats';
+import { ModelService } from './services/model';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [Camera, Result, Stats],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
 })
 export class App {
-  protected readonly title = signal('detector-frutas');
+  readonly modelSvc = inject(ModelService);
 }
