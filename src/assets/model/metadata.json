@@ -19,9 +19,14 @@
     224,
     3
   ],
-  "val_accuracy": 0.8557,
-  "val_loss": 0.2698,
+  "val_accuracy": 0.8487,
+  "val_loss": 0.2834,
   "modelo_base": "MobileNetV2",
   "num_clases": 3,
-  "descripcion": "Detector de calidad de frutas — maduro/verde/podrido"
+  "frutas": [
+    "banana",
+    "apple",
+    "orange"
+  ],
+  "descripcion": "Detector de calidad de frutas — maduro/verde/podrido (banana, apple, orange)"
 }

@@ -47,7 +47,7 @@ export class PredictionService {
     'plátano': '🍌', 'mango': '🥭', 'fresa': '🍓', 'naranja': '🍊', 'manzana': '🍎',
   };
 
-  readonly fruits = ['plátano', 'mango', 'fresa', 'naranja', 'manzana'] as const;
+  readonly fruits = ['plátano', 'manzana', 'naranja'] as const;
 
   getInfo(cls: FruitClass): ClassInfo {
     return this.classMap[cls];
