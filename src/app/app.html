@@ -12,8 +12,8 @@
     } @else if (modelSvc.modelLoaded()) {
       <span class="chip live">Modelo real activo</span>
       <span class="chip">MobileNetV2</span>
-      <span class="chip">🍌 🍎 🍊</span>
-      <span class="chip">85% accuracy</span>
+      <span class="chip">🍌 Plátano</span>
+      <span class="chip">99% accuracy</span>
     } @else {
       <span class="chip warn">⚠️ Modo simulación</span>
     }
@@ -27,9 +27,9 @@
   } @else if (modelSvc.modelLoaded()) {
     Modelo cargado · <code>assets/model/model.json</code>
     <span class="sep">·</span> Input: <code>224×224×3</code>
-    <span class="sep">·</span> Frutas: <code>plátano · manzana · naranja</code>
+    <span class="sep">·</span> Fruta: <code>plátano</code>
     <span class="sep">·</span> Clases: <code>maduro · verde · podrido</code>
-    <span class="sep">·</span> Val. accuracy: <code>84.87 %</code>
+    <span class="sep">·</span> Val. accuracy: <code>98.85 %</code>
   } @else {
     ⚠️ Error al cargar el modelo:
     @if (modelSvc.modelError()) {
